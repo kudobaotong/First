@@ -139,11 +139,9 @@
 				//for layouts------------------------------------------------------
 				var hLayoutManager = new zim.LayoutManager();
 				var vLayoutManager = new zim.LayoutManager();
-				var gridManager = new zim.GridManager();
-				var guideManager = new zim.GuideManager();
 
-				var hP = app.makeHorizontalPages(hLayoutManager, gridManager, guideManager, stage, stageW, stageH);
-				var vP = app.makeVerticalPages(vLayoutManager, gridManager, guideManager, stage, stageW, stageH);
+				var hP = app.makeHorizontalPages(hLayoutManager, stage, stageW, stageH);
+				var vP = app.makeVerticalPages(vLayoutManager, stage, stageW, stageH);
 
 				//for changing pages (left, right, up, down)------------------------
 				var hPages = new zim.Pages(stage,[
@@ -325,8 +323,8 @@
 					zim.scaleTo(vP.info, stage, 100, 100);
 					hLayoutManager.resize();
 					vLayoutManager.resize();
-					gridManager.resize();
-					guideManager.resize();	
+					//gridManager.resize();
+					//guideManager.resize();	
 					stage.update();
 				}); // end of resizing
 				
@@ -379,7 +377,7 @@
 			stage.update();
 
 		}// end of avatarApp
-
+	//gridManager.dispose();
 	}); // end of ready
 
 </script>

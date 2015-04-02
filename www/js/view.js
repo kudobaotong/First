@@ -2,7 +2,7 @@
 var app = function(app) {
 	
 	//horizontal pages
-	app.makeHorizontalPages = function(layoutManager, gridManager, guideManager, stage, stageW, stageH) {
+	app.makeHorizontalPages = function(layoutManager, stage, stageW, stageH) {
 		p = {};
 
 		//main page layout
@@ -25,6 +25,13 @@ var app = function(app) {
 		var contents = p.main.contents = new createjs.Container();
 		contents.setBounds(0,0,600,900);
 		p.main.addChild(contents);
+
+		// // //head touch hotspot area
+		// var headTouch = p.headTouch = new zim.rectangle(10, 10, "#9494B8");
+		// headTouch.x = 30;
+		// headTouch.y = 30;
+		// headTouch.visible = true;
+		// contents.addChild(headTouch);
 
 		//avatar layout
 		var avatar = p.mainAvatar = new zim.Rectangle(500,700, "#FFFFFF");
@@ -116,8 +123,7 @@ var app = function(app) {
 		
 		layoutManager.add(infoLayout);
 
-		//guideManager.dispose();
-		//gridManager.dispose();
+		layoutManager.dispose();
 				
 		return p;
 		
@@ -125,7 +131,7 @@ var app = function(app) {
 	}//end make horizontal pages
 	
 	//vartical pages
-	app.makeVerticalPages = function(layoutManager, gridManager, guideManager, stage, stageW, stageH) {
+	app.makeVerticalPages = function(layoutManager, stage, stageW, stageH) {
 		
 		p = {};
 		
@@ -149,6 +155,13 @@ var app = function(app) {
 		var contents = p.main.contents = new createjs.Container();
 		contents.setBounds(0,0,600,900);
 		p.main.addChild(contents);
+
+		// //head touch hotspot area
+		// var headTouch = p.headTouch = new zim.rectangle(10, 10, "#9494B8");
+		// headTouch.x = 30;
+		// headTouch.y = 30;
+		// headTouch.visible = true;
+		// contents.addChild(headTouch);
 
 		//avatar layout
 		var avatar = p.mainAvatar = new zim.Rectangle(500,700, "#FFFFFF");
@@ -187,9 +200,9 @@ var app = function(app) {
 		footer.addChild(related2);
 		
 		//draw grid
-		gridManager.add( new zim.Grid(contents) );
-		guideManager.add( new zim.Guide(contents) );
-		guideManager.add( new zim.Guide(contents, false) );
+		//gridManager.add( new zim.Grid(contents) );
+		//guideManager.add( new zim.Guide(contents) );
+		//guideManager.add( new zim.Guide(contents, false) );
 		
 		var mainParts = [ 
 		{object:intro, marginTop:0, maxWidth:100, height:10, align:"middle", valign:"top", backgroundColor:"#9494B8"},
@@ -244,8 +257,7 @@ var app = function(app) {
 		
 		layoutManager.add(infoLayout);
 
-		//guideManager.dispose();
-		//gridManager.dispose();
+		layoutManager.dispose();
 				
 		return p;
 	}
