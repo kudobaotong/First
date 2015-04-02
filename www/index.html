@@ -1,14 +1,392 @@
 <!doctype html>
 <html>
-	<head>
-		<title>First</title>
-		<script src="js/createjs-2014.12.12.min.js"></script>
-		<script src="js/zim_1.4_min.js"></script>
-		<script>
-		zog("Hello from First!");
-		</script>
-	</head>
-	<body>
-		<h1>Hello All</h1>
-	</body>
+<head>
+	<title>Play with Me</title>
+
+	<meta charset="UTF-8">
+	<meta name="description" content="small avatar app on mobile">
+	<meta name="keywords" content="avatar, mobile, app, interactive">
+	<meta name="author" content="Cynthia Bao">
+	<!-- javascript libraries -->
+	<script>var zon = false;</script>
+	<script src="js/createjs-2014.12.12.min.js"></script>
+	<script src="js/zim_min.js"></script>
+	<script src="js/view.js"></script>
+	<script src="js/controller.js"></script>
+	<script src="js/ontoStage.js"></script>
+	<script src="js/buttons.js"></script>
+	<link href='http://fonts.googleapis.com/css?family=Walter+Turncoat' rel='stylesheet' type='text/css'>
+	<style>
+		body {margin:0px; padding:0px; background-color:#9494B8;}
+		#myCanvas {position:absolute; background-color:##9494B8;}
+	</style>
+	<script>
+	// SCALING OPTIONS
+	// "full": sets canvas and stage to window size (canvas is actually set to screen size)
+	var scaling = "full"; // full automatically sets width and height to window size
+	var width = null;
+	var height = null;
+	var frame = new zim.Frame(scaling, width, height); 
+	
+	//start to load
+	frame.on("ready", function() {
+		
+		//define the layout stage
+		var stage = frame.stage;
+		var stageW = frame.width;
+		var stageH = frame.height;
+
+		// handle asset loading and call main app function when complete
+		var contentPath = "content/";
+
+		//preloading
+		var preload = new createjs.LoadQueue(true, contentPath);
+		preload.installPlugin(createjs.Sound); // for sound preload
+
+		// array of objects to preload
+		var manifest = [{src:"startspritesheet.png", id:"start"},
+		{src:"refresh1.png", id:"refresh1"},
+		{src:"refresh2.png", id:"refresh2"},
+		{src:"change.png", id:"change"},
+		{src:"gonext.png", id:"gonext"},
+		{src:"goback.png", id:"goback"},
+		{src:"banana1spritesheet.png", id:"main1"},
+		{src:"banana2spritesheet.png", id:"main2"},
+		//{src:"banana3spritesheet.png", id:"main3"},
+		//{src:"bgm.mp3", id:"welcome"}
+		]; 
+		
+		
+		preload.on("progress", animateProgress); // this will update the progress (optional)
+		preload.on("complete", avatarApp);	 // call the main code when ready	
+		preload.loadManifest(manifest);
+
+		var waiter = new zim.Waiter(stage, 600, "white", "black", 14);
+		waiter.show();
+
+		// make a preloader first and animate it below
+		function animateProgress(e) {
+		// zog("progress " + e.target.progress);	
+		// the progress property gives a number from 0-1 representing progress
+		}
+
+		function avatarApp() {
+			waiter.hide();
+
+			//create start animated spritesheet-----------------------------------
+			var sData;
+			var sSpritesheet;
+			var starter;
+
+			sinit();
+
+			function sinit() {
+			    createjs.Ticker.addEventListener("tick", runStarter);
+			    createjs.Ticker.setFPS(5);
+			    spinStarter();
+			}
+
+			function spinStarter() {
+
+				sData = {
+
+				"images": [preload.getResult("start")],
+				"frames": [
+
+				    [2, 2, 362, 553], 
+				    [2, 557, 361, 555], 
+				    [2, 1114, 361, 555]    
+				     
+				],
+				"animations": {
+				    
+				    "normalAction":[0,1,2],  
+				}
+				};
+
+			   sSpritesheet = new createjs.SpriteSheet(sData);
+			   starter = new createjs.Sprite(sSpritesheet,'normalAction');
+			   starter.regY = starter.getBounds().height/2;
+			   starter.regX = starter.getBounds().width/2;
+			   starter.y = 350;
+			   starter.x = 250;
+			 }
+
+			 function runStarter(e) {
+			    stage.update();
+			 }
+			 //end of create start spritesheet------------------------------------
+			stage.addChild(starter);
+			starter.alpha = 0;
+			zim.centerReg(starter);
+			starter.cursor = "pointer";
+
+			stage.addChild(starter);
+			zim.animate(starter, {alpha:1}, 4000);
+			starter.on("click", handleclick);
+			//createjs.Sound.play("welcome");
+
+			function handleclick() {
+				mainapp();
+			};
+
+			function mainapp() {
+				//set up the stage variables
+				stage = frame.stage;
+				stageW = frame.width;
+				stageH = frame.height;
+
+				//for layouts------------------------------------------------------
+				var hLayoutManager = new zim.LayoutManager();
+				var vLayoutManager = new zim.LayoutManager();
+				var gridManager = new zim.GridManager();
+				var guideManager = new zim.GuideManager();
+
+				var hP = app.makeHorizontalPages(hLayoutManager, gridManager, guideManager, stage, stageW, stageH);
+				var vP = app.makeVerticalPages(vLayoutManager, gridManager, guideManager, stage, stageW, stageH);
+
+				//for changing pages (left, right, up, down)------------------------
+				var hPages = new zim.Pages(stage,[
+					{page:hP.main,  swipe:[null, null, hP.info, hP.info]},//no swipe on horizontal
+					{page:hP.info,  swipe:[null, null, hP.main, hP.main]}
+					], "slide", 500
+					); 
+				var vPages = new zim.Pages(stage,[
+					{page:vP.main, swipe:[vP.info, vP.info, null, null]},//no swipe on vertical
+					{page:vP.info, swipe:[vP.main, vP.main, null, null]}
+					], "slide", 500
+					);
+
+				//for click events-------------------------------------------------
+
+				app.makeHotSpots(stage, vP, vPages);
+
+				//update environment-----------------------------------------------
+				stage.update();
+
+				//for buttons------------------------------------------------------
+				var imageRefresh1 = new createjs.Bitmap(preload.getResult("refresh1"));
+				var imageRefresh2 = new createjs.Bitmap(preload.getResult("refresh2"));
+				var imageChange = new createjs.Bitmap(preload.getResult("change"));
+				var imageNext = new createjs.Bitmap(preload.getResult("gonext"));
+				var imageBack = new createjs.Bitmap(preload.getResult("goback"));
+
+				var buttonsOnStage = app.addButtons(imageRefresh1, imageRefresh2, imageChange, imageNext, imageBack, vP, stage);
+
+				///////////////////////
+				//main avatar actions//--------------------------------------------
+				///////////////////////
+				//create first avatar----------------------------------------------
+				var aDataOne;
+				var aSpritesheetOne;
+				var avatarOne;
+
+				a1init();
+
+				function a1init() {
+				    createjs.Ticker.addEventListener("tick", runAvatarOne);
+				    createjs.Ticker.setFPS(5);
+				    spinAvatarOne();
+				}
+
+				function spinAvatarOne() {
+
+					aDataOne = {
+
+					"images": [preload.getResult("main1")],
+					"frames": [
+
+						[321, 2, 272, 478], 
+					    [2, 2, 317, 480], 
+					    [595, 2, 264, 478], 
+					    [861, 2, 263, 478]
+						 
+					],
+					"animations": {
+					    
+					    "normalAction1":[0,1,2,3],  
+					}
+					};
+
+				   aSpritesheetOne = new createjs.SpriteSheet(aDataOne);
+				   avatarOne = new createjs.Sprite(aSpritesheetOne,'normalAction1');
+				   avatarOne.regY = avatarOne.getBounds().height/2;
+				   avatarOne.regX = avatarOne.getBounds().width/2;
+				   avatarOne.y = 350;
+				   avatarOne.x = 250;
+				 }
+
+				 function runAvatarOne(e) {
+				    stage.update();
+				 }
+
+
+				//create second avatar---------------------------------------------
+				var aDataTwo;
+				var aSpritesheetTwo;
+				var avatarTwo;
+
+				a2init();
+
+				function a2init() {
+				    createjs.Ticker.addEventListener("tick", runAvatarTwo);
+				    createjs.Ticker.setFPS(5);
+				    spinAvatarTwo();
+				}
+
+				function spinAvatarTwo() {
+
+					aDataTwo = {
+
+					"images": [preload.getResult("main2")],
+					"frames": [
+
+					    [2, 2, 197, 489], 
+						[427, 2, 264, 477], 
+						[201, 2, 224, 486], 
+						[693, 2, 254, 473]    
+					     
+					],
+					"animations": {
+					    
+					    "normalAction2":[0,1,2,3],  
+					}
+					};
+
+				   aSpritesheetTwo = new createjs.SpriteSheet(aDataTwo);
+				   avatarTwo = new createjs.Sprite(aSpritesheetTwo,'normalAction2');
+				   avatarTwo.regY = avatarTwo.getBounds().height/2;
+				   avatarTwo.regX = avatarTwo.getBounds().width/2;
+				   avatarTwo.y = 350;
+				   avatarTwo.x = 250;
+				 }
+
+				 function runAvatarTwo(e) {
+				    stage.update();
+				 }
+
+				//  //create third avatar---------------------------------------------
+				// var aDataThree;
+				// var aSpritesheetThree;
+				// var avatarThree;
+
+				// a3init();
+
+				// function a3init() {
+				//     createjs.Ticker.addEventListener("tick", runAvatarThree);
+				//     createjs.Ticker.setFPS(5);
+				//     spinAvatarThree();
+				// }
+
+				// function spinAvatarThree() {
+
+				// 	aDataThree = {
+
+				// 	"images": [preload.getResult("main3")],
+				// 	"frames": [
+
+				// 	    [2, 2, 587, 640], 
+				// 	    [591, 2, 587, 640], 
+				// 	    [1180, 2, 587, 640] 
+					     
+				// 	],
+				// 	"animations": {
+					    
+				// 	    "normalAction3":[2,1,0],  
+				// 	}
+				// 	};
+
+				//    aSpritesheetThree = new createjs.SpriteSheet(aDataThree);
+				//    avatarThree = new createjs.Sprite(aSpritesheetThree,'normalAction3');
+				//    avatarThree.regY = avatarThree.getBounds().height/2;
+				//    avatarThree.regX = avatarThree.getBounds().width/2;
+				//    avatarThree.y = 350;
+				//    avatarThree.x = 250;
+				//  }
+
+				//  function runAvatarThree(e) {
+				//     stage.update();
+				//  }
+
+				//add avatar
+				app.avatarActions(stage, avatarOne, avatarTwo, vP, vPages);
+				//add info page text
+				var titleText = "Welcome to \n\n --Banana Play!";
+				var inforText = "At here, you can\n\nhave some fun with\n\nthe cute Mr. Banana.\n\nTap the buttons below.";
+				app.infoPage(stage, titleText, inforText, vP, vPages);
+				//update environment-----------------------------------------------
+				stage.update();
+
+				// resizing(scaling="full" only)-----------------------------------
+				frame.on("resize", function(e) {
+					stageW = frame.stageW;
+					stageH = frame.stageH;
+					zim.scaleTo(hP.info, stage, 100, 100, "both");
+					zim.scaleTo(vP.info, stage, 100, 100);
+					hLayoutManager.resize();
+					vLayoutManager.resize();
+					gridManager.resize();
+					guideManager.resize();	
+					stage.update();
+				}); // end of resizing
+				
+				mainOrientation();
+				function mainOrientation(e) {	
+					//zog(frame.orientation);
+					if (frame.orientation == "horizontal") {
+						hPages.go(hP[vPages.page.name], null, "none"); //null direction, none transation
+						//get the current page's name and access the horizontal page with the name
+						stage.addChild(hPages);
+						hPages.enable();
+						hLayoutManager.enable();
+
+						stage.removeChild(vPages);
+						vPages.disable();
+						vLayoutManager.disable();
+					}else {
+						vPages.go(vP[hPages.page.name], null, "none");
+						stage.addChild(vPages);
+						vPages.enable();
+						vLayoutManager.enable();
+
+						stage.removeChild(hPages);
+						hPages.disable();
+						hLayoutManager.disable();
+					}
+					stage.update();
+				}; // end of orientation
+				
+			};//end of mainapp
+
+			// resizing(scaling="full" only)
+			frame.on("resize", resize);
+			function resize(e) {
+				stageW = frame.width;
+				stageH = frame.height;
+				
+				starter.x = stageW/2;
+				starter.y = stageH/2;
+				zim.scaleTo(starter, stage, 50); // 50% the stage width (also see zim.Layout)
+				
+				stage.update();
+			}
+			resize(); // want to resize after loading
+
+			// put orientation change code in here
+		 	frame.on("orientation", function(e) {			
+				stage.update();
+			});
+			stage.update();
+
+		}// end of avatarApp
+
+	}); // end of ready
+
+</script>
+</head>
+<body>
+	<canvas id="appCanvas" width="300" height="300">
+		HERE IS THE CANVAS
+	</canvas>
+</body>
 </html>
