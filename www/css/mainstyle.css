@@ -1,0 +1,36 @@
+
+body {
+	margin:0px; 
+	padding:0px; 
+	background-color: #9494B8;
+}
+
+#myCanvas {
+	position:absolute; 
+	background-color: #9494B8;
+	-webkit-animation: colorSwitch 10s infinite alternate;
+	-moz-animation: colorSwitch 10s infinite alternate;
+	animation: colorSwitch 10s infinite alternate;
+}
+
+@-webkit-keyframes colorSwitch {
+	0% {background-color: #9494B8;} 
+	25% {background-color: #FFF5A5;} 
+	50% {background-color: #FFD4DA;} 
+	75% {background-color: #99D2E4;} 
+	100% {background-color: #D8CAB4;} 
+}
+@-moz-keyframes colorSwitch {
+	0% {background-color: #9494B8;} 
+	25% {background-color: #FFF5A5;} 
+	50% {background-color: #FFD4DA;} 
+	75% {background-color: #99D2E4;} 
+	100% {background-color: #D8CAB4;} 
+}
+@keyframes colorSwitch {
+    0% {background-color: #9494B8;} 
+	25% {background-color: #FFF5A5;} 
+	50% {background-color: #FFD4DA;} 
+	75% {background-color: #99D2E4;} 
+	100% {background-color: #D8CAB4;} 
+}
